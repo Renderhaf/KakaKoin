@@ -1,0 +1,56 @@
+<html>
+<title>Qaka Koin Klassic</title>
+<body>
+  <div id="logindiv" style="border:1px solid #000000;display: inline-block; float: right;">
+
+    <input id="username" type="text" value="" style="text-align: center; margin : 0 auto; display: block"></br>
+    <input id="password" type="password" value="" style="text-align: center; margin : 0 auto; display: block"></br>
+
+    <input type="button" value="Log In" onclick="Login()" id = "loginb" align="center">
+    <input type="button" value="Log Out" onclick="Logout()" id = "logoutb" style="display: inline">
+    <input type="button" value="Sign In" onclick="" id = "signinb">
+    <h4 id="stat" align = "center"></h4>
+  </div>
+
+  <div id="main" align="center" style="float: center">
+    <p>Hello World</p>
+  </div>
+  <script>
+    function Login(){
+      localStorage.setItem('username',document.getElementById("username").value.toString())
+      localStorage.setItem('logged',true)
+    }
+
+    function Logout(){
+      localStorage.setItem('logged',false)
+      document.getElementById("username").value = ""
+      document.getElementById("password").value = ""
+      localStorage.clear()
+    }
+
+    function refresh(){
+
+      if (localStorage["logged"] == "true"){
+        document.getElementById("stat").innerHTML = "Hello " + localStorage["username"] + "!"
+
+        document.getElementById("loginb").style = "display: none"
+        document.getElementById("logoutb").style = "display: flex"
+        document.getElementById("username").style = "display: none"
+        document.getElementById("password").style = "display: none"
+        document.getElementById("signinb").style = "display: none"
+      } else {
+        document.getElementById("stat").innerHTML = "Log In To Use"
+
+        document.getElementById("loginb").style = "display: inline"
+        document.getElementById("logoutb").style = "display: inline"
+        document.getElementById("username").style = "text-align: center; margin : 0 auto; display: block"
+        document.getElementById("password").style = "text-align: center; margin : 0 auto; display: block"
+        document.getElementById("signinb").style = "display: inline"
+      }
+    }
+
+    var a = setInterval(refresh,100)
+      // console.log(sessionStorage)
+  </script>
+</body>
+</html>
