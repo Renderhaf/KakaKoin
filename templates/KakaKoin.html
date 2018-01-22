@@ -1,53 +1,29 @@
 <html>
 <title>Kaka Koin</title>
 <body>
-  <div id="logindiv" style="border:1px solid #000000;display: inline-block; float: right;">
 
-    <input id="username" type="text" value="" style="text-align: center; margin : 0 auto; display: block"></br>
-    <input id="password" type="password" value="" style="text-align: center; margin : 0 auto; display: block"></br>
-
-    <input type="button" value="Log In" onclick="Login()" id = "loginb" align="center">
-    <input type="button" value="Log Out" onclick="Logout()" id = "logoutb" style="display: inline">
-    <input type="button" value="Sign Up" onclick="SignUp()" id = "signinb">
-    <h4 id="stat" align = "center"></h4>
+  <div id="main" align="center" style="float: center; display:none;">
+    <p>Kaka Koin Wallet</p>
+    <h2 id = "worth">You currently have - Kaka Koins</h2>
+    <h4 id = "size">There are - Blocks in the blockchain</h4>
+    <h4 id = "logged" style="color:gray"></h4>
+    <input type="button" value="Logout" onclick="Logout()">
+    <a href="/Log">Log In</a>
+    <a href="/Sign">Sign Up</a>
   </div>
 
-  <div id="main" align="center" style="float: center">
-    <p>Kaka Koin Wallet</p>
-    
+  <div id="logsign" align="center" style="float: center; display:none;">
+    <h2>You Are Not Logged In!</h2>
+    <h3 style = "color:gray">Either <a href="/Log">Log In</a> Or <a href="/Sign">Sign In</a>.</h3>
   </div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
   <script>
-    function Login(){
-      $.post("/",{"Type":"log",
-                  "User": document.getElementById("username").value.toString(),
-                   "Password": document.getElementById("password").value.toString()},
-      function(data, status){
-        console.log(data)
-        if (data == "Logged In"){
-          localStorage.setItem('username', document.getElementById("username").value.toString())
-          localStorage.setItem('logged',true)
-          refresh()
-        } else {
-          alert(data)
-        }
-      });
+    if(localStorage["logged"] == "true"){
+      document.getElementById("main").style = "float: center; display:block;"
+    } else {
+      document.getElementById("logsign").style = "float: center; display:block;"
     }
-
-    function SignUp(){
-        $.post("/",{"Type":"Sign",
-                    "User": document.getElementById("username").value.toString(),
-                     "Password": document.getElementById("password").value.toString()},
-        function(data, status){
-          console.log(data)
-          if (data == "Sign Up"){
-            alert("User Created! LogIn to use!")
-          } else {
-            alert(data)
-          }
-        });
-    }
-
+    document.getElementById("logged").innerHTML = localStorage["logged"]
     function Logout(){
       localStorage.setItem('logged',false)
       document.getElementById("username").value = ""
@@ -76,9 +52,6 @@
         document.getElementById("signinb").style = "display: inline"
       }
 
-      function start(){
-
-      }
     }
   </script>
 </body>

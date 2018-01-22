@@ -1,0 +1,80 @@
+<html>
+<title>Sign Up</title>
+<head>
+  <style>
+    #logindiv{
+      text-align: center; background:#bfbfbf; margin:auto; height: 400px; width: 400px; position:fixed; top:0; bottom:0; left:0; right:0;
+    }
+
+    #cap{
+      display: inline-block;
+    }
+
+    input[type=text], [type=password]{
+      background-color: #b3d1ff;
+      color:black;
+      border: none;
+    }
+
+    input[type=button]{
+      border: none;
+    }
+
+    a{
+      font-family: sans-serif;
+    }
+
+  </style>
+</head>
+<body style="background:#f2f2f2">
+  <div id="logindiv">
+    </br></br></br></br>
+    <input id="username" type="text" value="" style="text-align: center; display: block ;margin:auto;" placeholder="USERNAME"></br>
+    <input id="password" type="password" value="" style="text-align: center; display: block;margin:auto;" placeholder="PASSWORD"></br>
+
+    <div id ="cap" class = "capp"></div>
+
+  </br></br>
+
+    <input type="button" value="Sign Up" onclick="SignUp()" id = "signinb" style="text-align: center; display: block ;margin:auto;">
+    </br>
+
+    <a href="/Log" style = "text-align: center; display: block ;margin:auto;">Already Have A User?</a>
+  </div>
+
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script>
+    donecap = false;
+
+    window.onload = function() {
+      var captchaWidgetId = grecaptcha.render( 'cap', {
+        'sitekey' : '6Lda2kEUAAAAADHWz9u__adheHIe7aWCHZFSz11N',  // required
+        'theme' : 'light',  // optional
+        'callback': 'gCall'  // optional
+      });
+      document.getElementById("cap").style = "";
+    }
+    var gCall = function(e){
+      donecap = true;
+    }
+    function SignUp(){
+        if (donecap){
+          $.post("/Sign",{"Type":"Sign",
+                      "User": document.getElementById("username").value.toString(),
+                       "Password": document.getElementById("password").value.toString()},
+          function(data, status){
+            console.log(data)
+            if (data == "Sign Up"){
+              alert("User Created! LogIn to use!")
+            } else {
+              alert(data)
+            }
+          });
+        } else {
+          alert("Complete The Captcha First!")
+        }
+    }
+  </script>
+</body>
+</html>

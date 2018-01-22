@@ -13,22 +13,12 @@ app.config['HOST'] = 'localhost'
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
+        return render_template("KakaKoin.html") # Just page
+
+@app.route("/Sign", methods=['GET', 'POST'])
+def Sign():
     if request.method == 'POST':
-        if request.form["Type"] == "log":
-            usr = request.form["User"]
-            pas = hashlib.sha256(request.form["Password"].encode('utf-8')).hexdigest()
-
-            data = udb.getUsers()
-
-            if usr in data:
-                if data[usr] == pas:
-                    return jsonify("Logged In")
-                else:
-                    return jsonify("Wrong Password")
-            else:
-                return jsonify("Username Doesnt exist")
-
-        if request.form["Type"] == "Sign":
+        if request.form["Type"] == "Sign": # Signin
             usr = request.form["User"]
             pas = hashlib.sha256(request.form["Password"].encode('utf-8')).hexdigest()
 
@@ -45,7 +35,26 @@ def index():
 
             return jsonify("Sign Up")
     else:
-        return render_template("KakaKoin.html")
+        return render_template("Signup.html")
+
+@app.route("/Log", methods=['GET','POST'])
+def Log():
+    if request.method == 'POST':
+        if request.form["Type"] == "log": # login
+            usr = request.form["User"]
+            pas = hashlib.sha256(request.form["Password"].encode('utf-8')).hexdigest()
+
+            data = udb.getUsers()
+
+            if usr in data:
+                if data[usr] == pas:
+                    return jsonify("Logged In")
+                else:
+                    return jsonify("Wrong Password")
+            else:
+                return jsonify("Username Doesnt exist")
+    else:
+        return render_template("Login.html")
 
 if __name__ == "__main__":
     port=os.environ.get('PORT') or 5000
