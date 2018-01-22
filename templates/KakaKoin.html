@@ -27,10 +27,8 @@
 
     function Logout(){
       localStorage.setItem('logged',false)
-      document.getElementById("username").value = ""
-      document.getElementById("password").value = ""
       localStorage.clear()
-      window.location.href = "/"
+      window.location.reload()
     }
   </script>
 </body>
