@@ -24,34 +24,13 @@
       document.getElementById("logsign").style = "float: center; display:block;"
     }
     document.getElementById("logged").innerHTML = localStorage["logged"]
+
     function Logout(){
       localStorage.setItem('logged',false)
       document.getElementById("username").value = ""
       document.getElementById("password").value = ""
       localStorage.clear()
-      refresh()
-    }
-
-    function refresh(){
-
-      if (localStorage["logged"] == "true"){
-        document.getElementById("stat").innerHTML = "Hello " + localStorage["username"] + "!"
-
-        document.getElementById("loginb").style = "display: none"
-        document.getElementById("logoutb").style = "display: flex"
-        document.getElementById("username").style = "display: none"
-        document.getElementById("password").style = "display: none"
-        document.getElementById("signinb").style = "display: none"
-      } else {
-        document.getElementById("stat").innerHTML = "Log In To Use"
-
-        document.getElementById("loginb").style = "display: inline"
-        document.getElementById("logoutb").style = "display: inline"
-        document.getElementById("username").style = "text-align: center; margin : 0 auto; display: block"
-        document.getElementById("password").style = "text-align: center; margin : 0 auto; display: block"
-        document.getElementById("signinb").style = "display: inline"
-      }
-
+      window.location.href = "/"
     }
   </script>
 </body>
