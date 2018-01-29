@@ -32,8 +32,9 @@ def Sign():
         if request.form["Type"] == "Sign": # Signin
             usr = request.form["User"]
             pas = hashlib.sha256(request.form["Password"].encode('utf-8')).hexdigest()
+            digsig = request.form["DigitalSig"]
 
-            newtext = {usr: pas}
+            newtext = {usr: [pas,digsig]}
             #Read existing JSON file
             data = udb.getUsers()
             #Append the new entry onto Temporary variable
@@ -58,7 +59,7 @@ def Log():
             data = udb.getUsers()
 
             if usr in data:
-                if data[usr] == pas:
+                if data[usr][0] == pas:
                     return jsonify("Logged In")
                 else:
                     return jsonify("Wrong Password")

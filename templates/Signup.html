@@ -44,6 +44,7 @@
 
   <script src="https://www.google.com/recaptcha/api.js?render=explicit"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="../static/SHA.js"></script>
   <script>
     donecap = false;
 
@@ -60,9 +61,17 @@
     }
     function SignUp(){
         if (donecap){
+          var user = document.getElementById("username").value.toString();
+          var pas = document.getElementById("password").value.toString();
+          
+          var sha256 = new jsSHA('SHA-256', 'TEXT');
+          sha256.update(user+pas);
+          var hash = sha256.getHash("HEX");
+
           $.post("/Sign",{"Type":"Sign",
-                      "User": document.getElementById("username").value.toString(),
-                       "Password": document.getElementById("password").value.toString()},
+                      "User": user,
+                       "Password": pas,
+                       "DigitalSig": hash},
           function(data, status){
             console.log(data)
             if (data == "Sign Up"){

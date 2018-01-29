@@ -39,17 +39,29 @@
     <a href="/Sign" style = "text-align: center; display: block ;margin:auto;">Dont Have A User?</a>
   </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+<script src="../static/SHA.js"></script>
+
   <script>
 
   function Login(){
+    var user = document.getElementById("username").value.toString();
+    var pas = document.getElementById("password").value.toString();
+
+    var sha256 = new jsSHA('SHA-256', 'TEXT');
+    sha256.update(user+pas);
+    var hash = sha256.getHash("HEX");
+
     $.post("/Log",{"Type":"log",
-                "User": document.getElementById("username").value.toString(),
-                 "Password": document.getElementById("password").value.toString()},
+                  "User": user,
+                  "Password": pas},
+
     function(data, status){
       console.log(data)
       if (data == "Logged In"){
         localStorage.setItem('username', document.getElementById("username").value.toString())
         localStorage.setItem('logged',true)
+        localStorage.setItem('DigSig', hash)
+
         window.location.href = "/"
       } else {
         alert(data)
