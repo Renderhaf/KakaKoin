@@ -13,6 +13,17 @@ app.config['HOST'] = 'localhost'
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        if request.form['Type'] == "start":
+            d = {} # Here I need to put a function that returns how much the user is worth, all the transactions that have something to do with him, and the blockchain size.
+            return jsonify(d)
+        if request.form['Type'] == "Transfer":
+            try:
+            # here we call the transfer function
+                return jsonify("Transfer Successful!")
+            except:
+                return jsonify("Oops... Error...")
+    else:
         return render_template("KakaKoin.html") # Just page
 
 @app.route("/Sign", methods=['GET', 'POST'])

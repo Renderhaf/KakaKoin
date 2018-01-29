@@ -1,34 +1,163 @@
 <html>
-<title>Kaka Koin</title>
+<head>
+  <title>Kaka Koin</title>
+  <style>
+    table, th, td {
+        border: 0.5px solid black;
+        font-weight:normal;
+        table-layout:fixed;
+    }
+
+    .bigdiv{
+      width: 100%;
+      height: 100%;
+    }
+    .buttondiv{
+      text-align: left;
+      display: block;
+      width: 100%;
+      height: 20%;
+    }
+
+    .buttondiv input[type=button] {
+      background-color: #ffffff;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.1s;
+    }
+
+    .scrollhistory{
+      width:100%;
+      height:100%;
+    }
+
+    .scrollhistory{
+      overflow:hidden; overflow-y:scroll;
+    }
+
+    .scrollhistory ul li{
+      padding: 5px;
+      list-style: none;
+    }
+  </style>
+</head>
 <body>
 
   <div id="main" align="center" style="float: center; display:none;">
-    <p>Kaka Koin Wallet</p>
-    <h2 id = "worth">You currently have - Kaka Koins</h2>
-    <h4 id = "size">There are - Blocks in the blockchain</h4>
-    <h4 id = "logged" style="color:gray"></h4>
-    <input type="button" value="Logout" onclick="Logout()">
-    <a href="/Log">Log In</a>
-    <a href="/Sign">Sign Up</a>
+    <h3 id = "welcome" >Welcome To Your Wallet, </h3>
+    <table style = "width:50%;height:50%;">
+      <tr>
+        <th rowspan="3" style = "">
+          <div class="scrollhistory">
+            <ul id="history">
+              <li style = "color:gray; text-decoration: underline;">History</li>
+            </ul>
+          </div>
+        </th>
+
+        <th rowspan="2" colspan="2" class = "e">
+
+          <!-- Transfer Recive Buy -->
+          <div class="bigdiv">
+            <div class="buttondiv">
+              <input type="button" value="Transfer" class="tabbutton" onclick="tabw(0)" id="T"/>
+              <input type="button" value="Recive" class="tabbutton" onclick="tabw(1)" id="R"/>
+              <input type="button" value="Buy" class="tabbutton" onclick="tabw(2)" id="B"/>
+            </div></br>
+            <div class="tab">
+
+              <div id="Transfer" style="display:block;">
+                <h2>Transfer</h2>
+                <input type="text" placeholder="TO" style="text-align:center;" id="to"></br>
+                <input type="range" min="0" max="100" value="0" onchange="valuechange()" id="slid"><input type="text" placeholder="$" style="width:30px;" id="val"></br></br>
+                <input type="button" value="Send" onclick="Transfer()">
+              </div>
+              <div id="Recive" style="display:none">
+                <h2>Your Address is <a style="text-decoration: underline;" id = "adrs"></a></h2>
+              </div>
+              <div id="Buy" style="display:none">
+                <h3 style="color:gray">This feature is not supported yet</h>
+              </div>
+
+            </div>
+          </div>
+        </th>
+      </tr>
+
+      <tr></tr>
+
+      <tr style="height:30%;">
+
+        <td style="text-align:center;" colspan="2" style="height:20%;">
+          <h3 id = "info"></h3>
+        </td>
+
+      </tr>
+    </table>
   </div>
 
   <div id="logsign" align="center" style="float: center; display:none;">
     <h2>You Are Not Logged In!</h2>
     <h3 style = "color:gray">Either <a href="/Log">Log In</a> Or <a href="/Sign">Sign In</a>.</h3>
   </div>
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
   <script>
     if(localStorage["logged"] == "true"){
       document.getElementById("main").style = "float: center; display:block;"
+
+      // Do stuff to load user info
+      var address = document.getElementById("adrs"); // for the recive tab
+      address.innerHTML = address.innerHTML + localStorage["username"];
+
+      var welcome = document.getElementById("welcome"); // for the top of the page
+      welcome.innerHTML = welcome.innerHTML + localStorage["username"] + "!";
+
+      tabw(0); // selects Transfer as the tab
+      datadict = getData();
+
+
     } else {
       document.getElementById("logsign").style = "float: center; display:block;"
     }
-    document.getElementById("logged").innerHTML = localStorage["logged"]
 
-    function Logout(){
+    function Logout(){ // pretty stright forward
       localStorage.setItem('logged',false)
       localStorage.clear()
       window.location.reload()
+    }
+
+    function tabw(val){ //for setting the tabs
+      var names = ["Transfer", "Recive", "Buy"];
+      var n = parseInt(val);
+      for (i = 0; i < names.length; i++){
+        document.getElementById(names[i]).style.display = "none";
+        document.getElementById(names[i][0]).style.backgroundColor = "inherit";
+      }
+      document.getElementById(names[n]).style.display = "block";
+      document.getElementById(names[n][0]).style.backgroundColor = "#ccc";
+    }
+
+    function valuechange(){
+      document.getElementById("val").value = document.getElementById("slid").value;
+    }
+
+    function getData(){
+      $.post( "/", {"Type":"start", "user":localStorage["username"]}, function(data, status){return data;});
+    }
+
+    function Transfer(){
+      var to = document.getElementById("to").value;
+      if (to == ""){alert("Please Fill Out the 'To' Field!"); return -1;}
+      $.post( "/", {
+      "Type":"Transfer",
+      "from":localStorage["username"],
+      "To":to,
+      "Amount":document.getElementById("val").value
+      }, function(data, status){alert(data);});
     }
   </script>
 </body>
