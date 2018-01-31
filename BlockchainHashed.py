@@ -129,6 +129,8 @@ def test ():
 # Adds a new transaction to the blockchain, including a very small amount of mining to secure the blockchain.
 # Returns either a success message or an error message as a string.
 def newTransaction (to,from_,amount):
+    if amount < 0:
+        return "ERROR : Transfer Amount Cannot Be Negative!"
     if(verifyBlockchain() == False):
         #Blockchain has been tampered with, don't make any new transactions
         return("ERROR: Blockchain Invalid - Transactions Disabled")
