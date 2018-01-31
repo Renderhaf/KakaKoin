@@ -11,6 +11,7 @@
     .bigdiv{
       width: 100%;
       height: 100%;
+      font-family: system-ui;
     }
     .buttondiv{
       text-align: left;
@@ -27,30 +28,38 @@
       cursor: pointer;
       padding: 14px 16px;
       transition: 0.1s;
+      font-family: system-ui;
     }
 
     .scrollhistory{
       width:100%;
       height:100%;
-    }
-
-    .scrollhistory{
+      font-family: system-ui;
       overflow:hidden; overflow-y:scroll;
     }
 
     .scrollhistory ul li{
-      padding: 5px;
+      padding-top:5px;
+      padding-bottom:5px;
+      padding-left:1px;
+      padding-right:1px;
       list-style: none;
+    }
+
+    .infobox{
+      text-align: center;
+      border: 0;
+      font-family: system-ui;
     }
   </style>
 </head>
 <body>
 
   <div id="main" align="center" style="float: center; display:none;">
-    <h3 id = "welcome" >Welcome To Your Wallet, </h3>
+    <h3 id = "welcome" style="font-family: system-ui;">Welcome To Your Wallet, </h3>
     <table style = "width:50%;height:50%;">
       <tr>
-        <th rowspan="3" style = "">
+        <th rowspan="3" style = "width: 40%;">
           <div class="scrollhistory">
             <ul id="history">
               <li style = "color:gray; text-decoration: underline;">History</li>
@@ -62,23 +71,26 @@
 
           <!-- Transfer Recive Buy -->
           <div class="bigdiv">
-            <div class="buttondiv">
+            <div class="buttondiv"> <!--Tabs-->
               <input type="button" value="Transfer" class="tabbutton" onclick="tabw(0)" id="T"/>
               <input type="button" value="Recive" class="tabbutton" onclick="tabw(1)" id="R"/>
               <input type="button" value="Buy" class="tabbutton" onclick="tabw(2)" id="B"/>
             </div></br>
             <div class="tab">
 
-              <div id="Transfer" style="display:block;">
+              <div id="Transfer" style="display:block;"> <!--Transfer Tab -->
                 <h2>Transfer</h2>
                 <input type="text" placeholder="TO" style="text-align:center;" id="to"></br>
                 <input type="range" min="0" max="100" value="0" onchange="valuechange()" id="slid"><input type="text" placeholder="$" style="width:30px;" id="val"></br></br>
-                <input type="button" value="Send" onclick="Transfer()">
+                <input type="button" value="Send" onclick="Transfer()">  <img id="loadgif" style = "display:none;" src="../static/ajax-loader.gif" alt="Transaction Loading..."/>
+
               </div>
-              <div id="Recive" style="display:none">
+
+              <div id="Recive" style="display:none"> <!--Recive Tab (Shows Your ID) -->
                 <h2>Your Address is <a style="text-decoration: underline;" id = "adrs"></a></h2>
               </div>
-              <div id="Buy" style="display:none">
+
+              <div id="Buy" style="display:none"> <!--Buy Tab -->
                 <h3 style="color:gray">This feature is not supported yet</h>
               </div>
 
@@ -91,22 +103,34 @@
 
       <tr style="height:30%;">
 
-        <td style="text-align:center;" colspan="2" style="height:20%;">
-          <h3 id = "info"></h3>
+        <td style="text-align:center;" colspan="2" style="height:20%;" class = "infobox"> <!-- Information Box-->
+          <table style = "width:100%;height:100%;boarder:none;">
+            <tr class = "infobox">
+              <td class = "infobox"><h4>Balance: </h4><h4 id="bal" >0</h4></td> <!-- Current Balance-->
+              <td class = "infobox"><h4>Chain Size: </h4><h4 id="bsize" >0</h4></td> <!-- Chain Size-->
+              <td class = "infobox"><h4>Supply: </h4><h4 id="supply" >0</h4></td> <!-- Supply-->
+            </tr>
+          </table>
         </td>
 
       </tr>
     </table>
+    <footer align="center" style="color:gray;font-family: system-ui;"> <!-- Piece Of Text At The Bottom-->
+      <h6 id = "footernames"></h6>
+      <h6><a style = "color:gray;" href="#" onclick="Logout()">Logout</a></h6>
+    </footer>
   </div>
 
   <div id="logsign" align="center" style="float: center; display:none;">
-    <h2>You Are Not Logged In!</h2>
-    <h3 style = "color:gray">Either <a href="/Log">Log In</a> Or <a href="/Sign">Sign Up</a>.</h3>
+    <h2 style="font-family: system-ui;">You Are Not Logged In!</h2>
+    <h3 style = "color:gray;font-family: system-ui;">Either <a href="/Log">Log In</a> Or <a href="/Sign">Sign Up</a>.</h3>
   </div>
+
+
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
   <script>
-    if(localStorage["logged"] == "true"){
+    if(localStorage["logged"] == "true"){ // if logged In, Show This
       document.getElementById("main").style = "float: center; display:block;"
 
       // Do stuff to load user info
@@ -117,7 +141,7 @@
       welcome.innerHTML = welcome.innerHTML + localStorage["username"] + "!";
 
       tabw(0); // selects Transfer as the tab
-      datadict = getData();
+      getData();
 
 
     } else {
@@ -141,24 +165,75 @@
       document.getElementById(names[n][0]).style.backgroundColor = "#ccc";
     }
 
-    function valuechange(){
+    function valuechange(){ // change the value for the value text box according to the slider
       document.getElementById("val").value = document.getElementById("slid").value;
     }
 
-    function getData(){
-      $.post( "/", {"Type":"start", "user":localStorage["username"]}, function(data, status){return data;});
+    function getData(){ // Get user data (For the start)
+
+      // Randomizes the name order ;)
+      let names = document.getElementById("footernames");
+      if (Math.random() > 0.5) {
+        names.innerHTML = "Created By Dvir Akerman And Oren Kohavi";
+      } else {
+        names.innerHTML = "Created By Oren Kohavi and Dvir Akerman";
+      }
+
+      // This is sending a request to the server for the userinformation, and then applies it to the page
+      $.post( "/", {"Type":"start", "user":localStorage["username"], "DigSig":localStorage["DigSig"]}, function(data, status){
+        var chainl = sint(data[0]);
+        var kknsupply = sint(data[1]);
+        var balance = sint(data[2]);
+        var his = data[3];
+
+        if (his.length != 0){ // appeneds the history data to the list
+          for (i = 0 ; i < his.length; i++){
+            var dic = his[i];
+            $("#history").append('<li>'+ dic["Amount"] + " : " + dic["From"] + " -> " + dic["To"] +'</li>');
+          }
+        }
+
+        // Setting the text in the info box
+        baldoc = document.getElementById("bal");
+        baldoc.innerHTML = balance + "KKN";
+        supdoc = document.getElementById("supply");
+        supdoc.innerHTML = kknsupply + "KKN";
+        chsizdoc = document.getElementById("bsize");
+        chsizdoc.innerHTML = chainl + " Blocks";
+
+        document.getElementById("slid").max = parseFloat(balance);
+      });
     }
 
-    function Transfer(){
+    function Transfer(){ // Send a request to the server for Transfering funds
+
       var to = document.getElementById("to").value;
-      if (to == ""){alert("Please Fill Out the 'To' Field!"); return -1;}
+      if (to == ""){alert("Please Fill Out the 'To' Field!"); return -1;} // Check if you have inputed a "To" value
+
+      var amnt = document.getElementById("val").value
+      if (parseFloat(amnt) == 0 || amnt == ""){alert("Please Put In an Amount to Transfer!"); return -1;} // Check if you inputed a value for amount
+
+      var load = document.getElementById("loadgif");
+      load.style = "display:inline-block"; // show the loading gif
+
       $.post( "/", {
-      "Type":"Transfer",
-      "from":localStorage["username"],
-      "To":to,
-      "Amount":document.getElementById("val").value,
-      "DigSig":localStorage["DigSig"]
-      }, function(data, status){alert(data);});
+          "Type":"Transfer",
+          "From":localStorage["username"],
+          "To":to,
+          "Amount": amnt,
+          "DigSig":localStorage["DigSig"] // Digital Signiture
+        }, function(data, status){
+          load.style = "display:none";
+          alert(data);
+          if (data == "Transaction completed successfullly!"){
+            window.location.reload();
+          }
+      });
+    }
+
+    function sint(n){ // shorten an int
+      var len = 5;
+      return parseInt(n*len)/5
     }
   </script>
 </body>

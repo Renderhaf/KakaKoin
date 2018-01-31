@@ -62,8 +62,9 @@
     function SignUp(){
         if (donecap){
           var user = document.getElementById("username").value.toString();
+          if (isValidName(user) == false) {return -1;}
           var pas = document.getElementById("password").value.toString();
-          
+
           var sha256 = new jsSHA('SHA-256', 'TEXT');
           sha256.update(user+pas);
           var hash = sha256.getHash("HEX");
@@ -83,6 +84,17 @@
         } else {
           alert("Complete The Captcha First!")
         }
+    }
+
+    function isValidName(str){
+      var valids = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_+=,.@$*~ "
+      for (i = 0; i < str.length; i ++){
+        if (valids.indexOf(str[i]) == -1){
+          alert("Your Name or Password are not valid. They can only contain these symbols: " + valids);
+          return false;
+        }
+      }
+      return true;
     }
   </script>
 </body>

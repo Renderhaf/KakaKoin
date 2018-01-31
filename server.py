@@ -5,24 +5,36 @@ from flask.json import jsonify
 import json
 import hashlib
 import Userdb as udb
+import BlockchainHashed as bch
+import BlockChainDB as bdb
 
 app = Flask(__name__)
 
 app.config['DEBUG'] = True
 app.config['HOST'] = 'localhost'
 
+print(bch.verifyBlockchain())
+
 @app.route("/", methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         if request.form['Type'] == "start":
-            d = {} # Here I need to put a function that returns how much the user is worth, all the transactions that have something to do with him, and the blockchain size.
+            d = bch.userInfo(request.form["user"])
             return jsonify(d)
         if request.form['Type'] == "Transfer":
-            try:
-            # here we call the transfer function
-                return jsonify("Transfer Successful!")
-            except:
-                return jsonify("Oops... Error...")
+            usrs = udb.getUsers()
+            if request.form["From"] in usrs:
+                if request.form["To"] in usrs:
+                    if request.form["DigSig"] == usrs[request.form["From"]][1]:
+                        rdata = bch.newTransaction(request.form["To"],request.form["From"], float(request.form["Amount"]))
+                        print(rdata)
+                        return jsonify(rdata)
+                    else:
+                        return jsonify("Wrong Digital Signiture!")
+                else:
+                    return jsonify("Sorry,The User You are Sending to Doesnt Exist!")
+            else:
+                return jsonify("Sorry, The User You Are Sending From Doesnt Exist!")
     else:
         return render_template("KakaKoin.html") # Just page
 
