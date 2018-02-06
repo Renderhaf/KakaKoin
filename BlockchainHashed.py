@@ -43,188 +43,109 @@ call this at the bottom if you want to test all functions in this program
 This program changes the blockchain if modify = True, so only use this on a test blockchain
 '''
 
-def test ():
+class BCH:
 
-    modify = True
+    def __init__(self):
+        self.blockchain = bdb.read()
+        self.supply = 0
 
-    #Testing if bdb.read() works
-    print("Printing the result of 'bdb.read()' -- Warning, if the blockchain is long, this can be a confusing wall of text'")
-    print(bdb.read())
-    print()
-    print("--")
-    print()
+    # Adds a new transaction to the blockchain, including a very small amount of mining to secure the blockchain.
+    # Returns either a success message or an error message as a string.
+    def newTransaction (self,to,from_,amount):
+        if amount < 0:
+            return "ERROR : Transfer Amount Cannot Be Negative!"
+        if(self.verifyBlockchain() == False):
+            #Blockchain has been tampered with, don't make any new transactions
+            return("ERROR: Blockchain Invalid - Transactions Disabled")
 
-    #Testing newTransaction
-    if(modify):
-        print("Attempting to add a transaction to 'Daddy' from 'Mommy', with an amount of 15.75 KKN")
-        # To, From, Amount
-        print(newTransaction("Daddy",0,15.75))
+        if(from_ != 0):
+            #Check that this person isn't overspending.
+            if(self.countMoneyFor(from_) - amount < 0):
+                return("ERROR: Not enough funds to complete this transaction!")
 
-    else:
-        print("Blockchain Modification is Disabled -- Not Attempting To Add a New Transaction")
+        if len(self.blockchain) != 0:
+            lastBlockHash = hashlib.sha256(str(self.blockchain[len(self.blockchain)-1]).encode('utf-8')).hexdigest()
+        else:
+            lastBlockHash = ""
+        block = {"PreviousHash":lastBlockHash,"To":to,"From":from_,"Amount":amount,"Modifier":""}
 
-    print()
-    print("--")
-    print()
+        #Find a modifier -- This is the small amount of mining.
+        # with 5 zeros in the hash, it will take hundreds of thousands of guesses to get the correct hash. it will take about one second.
+        while not(hashlib.sha256(str(block).encode('utf-8')).hexdigest().startswith("00000")):
+            block["Modifier"] = hashlib.sha256(str(os.urandom(100)).encode('utf-8')).hexdigest()
 
+        #from is a reserved word, so I use from_
+        self.blockchain.append(block)
+        bdb.update(self.blockchain)
 
-    print("Testing the countMoney function -- This should print a dictionary with all users and money amount")
-    print(countMoney())
+        self.blockchain = bdb.read()
+        return("Transaction completed successfullly!")
 
-    print()
-    print("--")
-    print()
+    #Returns an dictionary {"Username":Amount} of every single user on the blockchain
+    def countMoney(self):
+        balanceSheet = {}
+        for i in self.blockchain:
+            #Add users to the dictionary if they don't exist already
+            if (not(i["To"] in balanceSheet.keys())):
+                balanceSheet[i["To"]] = 0
+            if (not(i["From"] in balanceSheet.keys())):
+                balanceSheet[i["From"]] = 0
 
-    print("Testing the countMoneyFor function for 'Daddy' -- Note that this will return 0 if modify = false")
-    print(countMoneyFor("Daddy"))
+            if (i["To"] in balanceSheet.keys() and i["From"] in balanceSheet.keys()):
+                balanceSheet[i["To"]] += i["Amount"]
+                #Balancesheet at "To" += the amount transferred in the block
+                balanceSheet[i["From"]] -= i["Amount"]
+                #Balancesheet at "From" -= the amount transferred in the block
 
-    print()
-    print("--")
-    print()
-
-    print("Returning all transaction history for 'Daddy' -- Note that this will return nothing if modify = false")
-    print(returnHistory("Daddy"))
-
-    print()
-    print("--")
-    print()
-
-    print("Checking the validity of the blockchain using the verifyBlockchain function")
-    print("is the blockchain valid? " + str(verifyBlockchain()))
-
-
-    #Changing the validity of the blockchain
-    if modify:
-        print("Changing a part of the blockchain to test validity")
-        blockchain = bdb.read()
-        originalUser = blockchain[len(blockchain)-1]["To"]
-        blockchain[len(blockchain)-1]["To"] = "L33THacker" #Replace daddy with hacker
-        bdb.update(blockchain)
-
-        print("Checking the validity of the blockchain after tampering")
-        print("is the blockchain valid? " + str(verifyBlockchain()) + " <-- This should be False")
-
-        #Attempting to revert blockchain back to original (uncorrupted) status
-        blockchain[len(blockchain)-1]["To"] = originalUser
-        bdb.update(blockchain)
-        print("After a repair to the blockchain, it is now: " + str(verifyBlockchain()))
-    else:
-        print("Not changing blockchain to test validity, since modify = False")
-
-    print()
-    print("--")
-    print()
-
-    print("userInfo for 'Daddy'")
-    print(userInfo("Daddy"))
-
-    print()
-    print("--")
-    print()
-
-    print("Printing Blockchain Again -- Warning, this may be long")
-    print(bdb.read())
+        #balanceSheet[0] = 0
+        # ^ Omitting this line, since I'm using the negative balance of 0 in order to calculate the total kaka balance
+        return balanceSheet
 
 
-# Adds a new transaction to the blockchain, including a very small amount of mining to secure the blockchain.
-# Returns either a success message or an error message as a string.
-def newTransaction (to,from_,amount):
-    if amount < 0:
-        return "ERROR : Transfer Amount Cannot Be Negative!"
-    if(verifyBlockchain() == False):
-        #Blockchain has been tampered with, don't make any new transactions
-        return("ERROR: Blockchain Invalid - Transactions Disabled")
-    blockchain = bdb.read()
-    if(from_ != 0):
-        #Check that this person isn't overspending.
-        if(countMoneyFor(from_) - amount < 0):
-            return("ERROR: Not enough funds to complete this transaction!")
-
-    if len(blockchain) != 0:
-        lastBlockHash = hashlib.sha256(str(blockchain[len(blockchain)-1]).encode('utf-8')).hexdigest()
-    else:
-        lastBlockHash = ""
-    block = {"PreviousHash":lastBlockHash,"To":to,"From":from_,"Amount":amount,"Modifier":""}
-
-    #Find a modifier -- This is the small amount of mining.
-    # with 5 zeros in the hash, it will take hundreds of thousands of guesses to get the correct hash. it will take about one second.
-    while not(hashlib.sha256(str(block).encode('utf-8')).hexdigest().startswith("00000")):
-        block["Modifier"] = hashlib.sha256(str(os.urandom(100)).encode('utf-8')).hexdigest()
-
-    #from is a reserved word, so I use from_
-    blockchain.append(block)
-    bdb.update(blockchain)
-    return("Transaction completed successfullly!")
-
-#Returns an dictionary {"Username":Amount} of every single user on the blockchain
-def countMoney():
-    blockchain = bdb.read()
-    balanceSheet = {}
-    for i in blockchain:
-        #Add users to the dictionary if they don't exist already
-        if (not(i["To"] in balanceSheet.keys())):
-            balanceSheet[i["To"]] = 0
-        if (not(i["From"] in balanceSheet.keys())):
-            balanceSheet[i["From"]] = 0
-
-        if (i["To"] in balanceSheet.keys() and i["From"] in balanceSheet.keys()):
-            balanceSheet[i["To"]] += i["Amount"]
-            #Balancesheet at "To" += the amount transferred in the block
-            balanceSheet[i["From"]] -= i["Amount"]
-            #Balancesheet at "From" -= the amount transferred in the block
-
-    #balanceSheet[0] = 0
-    # ^ Omitting this line, since I'm using the negative balance of 0 in order to calculate the total kaka balance
-    return balanceSheet
+    #Returns an int of the current balance of a user
+    #The balance should never be negative, but if it is, there are no checks.
+    def countMoneyFor(self, username):
+        #returns the balance for a specific Username
+        cnt = 0
+        for i in self.blockchain:
+            #print(i)
+            if (i["From"] == username):
+                cnt -= i["Amount"]
+            if (i["To"] == username):
+                cnt += i["Amount"]
+        return cnt
 
 
-#Returns an int of the current balance of a user
-#The balance should never be negative, but if it is, there are no checks.
-def countMoneyFor(username):
-    blockchain = bdb.read()
-    #returns the balance for a specific Username
-    cnt = 0
-    for i in blockchain:
-        #print(i)
-        if (i["From"] == username):
-            cnt -= i["Amount"]
-        if (i["To"] == username):
-            cnt += i["Amount"]
-    return cnt
+    #Returns a list of dictionaries, each dictionary is a short version of a block relating to the user.
+    #Short versions of a block don't contain hashes.
+    def returnHistory(self, username):
+        out = []
+        for i in self.blockchain:
+            if (i["From"] == username):
+                newDict = {"To":i["To"],"From":i["From"],"Amount":i["Amount"]}
+                out.append(newDict)
+            if (i["To"] == username):
+                newDict = {"To":i["To"],"From":i["From"],"Amount":i["Amount"]}
+                out.append(newDict)
+        return out
+
+    def verifyBlockchain(self):
+        prevHash = ""
+        for i in self.blockchain:
+            if prevHash != i["PreviousHash"]:
+                #print("Blockchain Doesn't Check Out!!")
+                return False
+            prevHash = hashlib.sha256(str(i).encode('utf-8')).hexdigest()
+        if len(self.blockchain) > 0:
+            if not(hashlib.sha256(str(self.blockchain[len(self.blockchain)-1]).encode('utf-8')).hexdigest().startswith("00000")):
+                #Special statement for the last blocks
+                return False
+        return True
 
 
-#Returns a list of dictionaries, each dictionary is a short version of a block relating to the user.
-#Short versions of a block don't contain hashes.
-def returnHistory(username):
-    blockchain = bdb.read()
-    out = []
-    for i in blockchain:
-        if (i["From"] == username):
-            newDict = {"To":i["To"],"From":i["From"],"Amount":i["Amount"]}
-            out.append(newDict)
-        if (i["To"] == username):
-            newDict = {"To":i["To"],"From":i["From"],"Amount":i["Amount"]}
-            out.append(newDict)
-    return out
-
-def verifyBlockchain():
-    blockchain = bdb.read()
-    prevHash = ""
-    for i in blockchain:
-        if prevHash != i["PreviousHash"]:
-            #print("Blockchain Doesn't Check Out!!")
-            return False
-        prevHash = hashlib.sha256(str(i).encode('utf-8')).hexdigest()
-    if len(blockchain) > 0:
-        if not(hashlib.sha256(str(blockchain[len(blockchain)-1]).encode('utf-8')).hexdigest().startswith("00000")):
-            #Special statement for the last blocks
-            return False
-    return True
-
-
-#Returns a list containing [Length of the blockchain, total kakakoin in existence, balance of the user, [all blocks relating to the user]]
-def userInfo(username):
-    return[len(bdb.read()),abs(countMoney()[0]),countMoneyFor(username),returnHistory(username)]
+    #Returns a list containing [Length of the blockchain, total kakakoin in existence, balance of the user, [all blocks relating to the user]]
+    def userInfo(self, username):
+        return[len(self.blockchain),abs(self.countMoney()[0]),self.countMoneyFor(username),self.returnHistory(username)]
 
 
 #test()

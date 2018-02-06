@@ -5,13 +5,15 @@ from flask.json import jsonify
 import json
 import hashlib
 import Userdb as udb
-import BlockchainHashed as bch
+import BlockchainHashed
 import BlockChainDB as bdb
 
 app = Flask(__name__)
 
 app.config['DEBUG'] = True
 app.config['HOST'] = 'localhost'
+
+bch = BlockchainHashed.BCH()
 
 print(bch.verifyBlockchain())
 
@@ -79,6 +81,10 @@ def Log():
                 return jsonify("Username Doesnt exist")
     else:
         return render_template("Login.html")
+
+@app.route("/Mine", methods=['GET','POST'])
+def Mine():
+    return render_template("Mine.html")
 
 if __name__ == "__main__":
     port=os.environ.get('PORT') or 5000

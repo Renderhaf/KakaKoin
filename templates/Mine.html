@@ -1,0 +1,29 @@
+<html>
+<body>
+  <div>
+    <input type="button" onclick="newmine()" value="try">
+  </div>
+  <script src="../static/SHA.js"></script>
+  <script>
+    function findHash(diff, block){
+     var modifyer = Math.random();
+
+     block["Modifier"] = modifyer;
+     var strblock = JSON.stringify(block);
+     var sha256 = new jsSHA('SHA-256', 'TEXT');
+     sha256.update(strblock);
+     var hash = sha256.getHash("HEX");
+
+     if (hash.startsWith(diff)) {return [true, modifyer]}
+     else{return [false, modifyer]}
+    }
+
+    function newmine(){
+      while(true){
+        var i = findHash("00000", {});
+        if (i[0]) {alert(i); break;}
+      }
+    }
+  </script>
+</body>
+</html>
